@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>尼尔机械纪元 Steam -> Win10 存档转换器</title>
+</head>
+<body style="font-family: monospace;">
+  <h1>尼尔机械纪元 Steam -> Win10 存档转换器</h1>
+  <p>参考：<a target="_blank" href="https://zhuanlan.zhihu.com/p/361941492">尼尔机械纪元 Win10 UWP XGP 成神版 汉化 存档迁移教程</a></p>
+  <p>请使用 Chrome 浏览器打开</p>
+  <p>Steam存档地址：C:\Users\{你的名字}\Documents\My Games\NieR_Automata\SlotData_0.dat</p>
+  <p>选择Steam存档文件：<input type="file" id="fileSteam" /></p>
+  <p>Win10版存档地址：C:\Users\{你的名字}\AppData\Local\Packages\39EA002F.NieRAutomataPC_n746a19ndrrjg\SystemAppData\wgs\000901FE0482ED62_0000000000000000000000007B6DEDD6\{16进制数}\{16进制数}</p>
+  <p>选择待替换的Win10存档文件：<input type="file" id="fileWin10" /></p>
+  <p><button type="button" id="convert">转换</button></p>
+  <p>转换后存档不保证能正常使用，<b>替换前先备份原存档！！！</b></p>
+  <script>
+    /**
+     * @param {Uint8Array} arr
+     * @param {number} number
+     * @param {Uint8Array | number[]} elements
+     * @returns {Uint8Array}
+     */
+    function splice(arr, starting, deleteCount, elements = []) {
+      if (arguments.length === 1) {
+        return arr;
+      }
+
+      const newSize = arr.length - deleteCount + elements.length;
+      const splicedArray = new arr.constructor(newSize);
+
+      splicedArray.set(arr.subarray(0, starting));
+      splicedArray.set(elements, starting);
+      splicedArray.set(arr.subarray(starting + deleteCount), starting + elements.length);
+      return splicedArray;
+    };
+
+    /** @param {Uint8Array} array */
+    function downloadArray(array) {
+      const url = URL.createObjectURL(new Blob([array]));
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'C02B55EE2B7146F59EB00EB4BB3DE706';
+      anchor.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    document.getElementById('convert').onclick = async e => {
+      /** @type {File} */
+      const fileSteam = document.getElementById('fileSteam').files[0];
+      /** @type {File} */
+      const fileWin10 = document.getElementById('fileWin10').files[0];
+      const arrSteam = new Uint8Array(await fileSteam.arrayBuffer());
+      const arrWin10 = new Uint8Array(await fileWin10.arrayBuffer());
+      arrSteam.set(headerData, arrWin10.slice(0, arrSteam[0x8C] === 0x53 ? 0x8B : 0x8A));
+      downloadArray(arrSteam);
+    };
+  </script>
+</body>
+</html>
